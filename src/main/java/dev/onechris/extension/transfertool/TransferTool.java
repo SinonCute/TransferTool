@@ -102,7 +102,6 @@ public class TransferTool implements Extension {
                     .description("Opens a menu to transfer you to a another server.")
                     .bedrockOnly(true)
                     .playerOnly(true)
-                    .aliases(List.of("proxy"))
                     .permission("transfertool.command.transfer")
                     .source(GeyserConnection.class)
                     .executor((source, command, args) -> sendForm(source))
@@ -121,9 +120,9 @@ public class TransferTool implements Extension {
 
         switch (args.length) {
             case 0 -> {
-                source.sendMessage("No server specified! Correct usage: '/transfertool transfer <server>'");
+                source.sendMessage("No server specified! Correct usage: '/transfer transfer <server>'");
                 if (mayTransferToAny(source)) {
-                    source.sendMessage("Alternatively, transfer to any server with '/transfertool transfer <ip> <port>'");
+                    source.sendMessage("Alternatively, transfer to any server with '/transfer <ip> <port>'");
                 }
             }
             case 1 -> {
@@ -143,7 +142,7 @@ public class TransferTool implements Extension {
             }
             case 2 -> {
                 if (!mayTransferToAny(source)) {
-                    source.sendMessage("Too many arguments! Correct usage: '/transfertool transfer <server>'");
+                    source.sendMessage("Too many arguments! Correct usage: '/transfer transfer <server>'");
                     return;
                 }
 
@@ -196,14 +195,14 @@ public class TransferTool implements Extension {
     }
 
     private boolean mayTransferToAny(GeyserConnection connection) {
-        return connection.hasPermission("transfertool.command.transfer.any");
+        return connection.hasPermission("transfer.command.transfer.any");
     }
 
     private void loadConfig() {
         try {
             config = ConfigLoader.loadConfig(this);
         } catch (Exception e) {
-            logger.error("Unable to load TransferTool config! " + e.getMessage());
+            logger.error("Unable to load transfer config! " + e.getMessage());
             this.disable();
             return;
         }

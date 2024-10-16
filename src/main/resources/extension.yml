@@ -1,4 +1,4 @@
-id: proxy
+id: transfer
 name: TransferTool
 main: dev.onechris.extension.transfertool.TransferTool
 api: 2.4.1

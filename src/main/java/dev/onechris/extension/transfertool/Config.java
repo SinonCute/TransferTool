@@ -44,6 +44,10 @@ public class Config {
             "lobby", "bedrockip.com"
     );
 
+    private String menuTitle = "Server Transfer";
+    private String menuContent = "Select a server to transfer to:";
+    private String buttonTitleFormat = "Transfer to %s";
+
     @Comment("""
             The config version. DO NOT CHANGE!
             """)

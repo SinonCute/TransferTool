@@ -1,5 +1,6 @@
 package dev.onechris.extension.transfertool;
 
+import org.geysermc.cumulus.form.SimpleForm;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.geyser.api.command.Command;
 import org.geysermc.geyser.api.command.CommandSource;
@@ -15,7 +16,9 @@ import org.geysermc.geyser.api.util.TriState;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class TransferTool implements Extension {
@@ -24,6 +27,7 @@ public class TransferTool implements Extension {
     private Map<String, Destination> serverShortcuts = new HashMap<>();
     private boolean followJavaTransfer = false;
     private boolean registerTransferCommand = false;
+    private Config config;
 
     @Subscribe
     public void onEnable(GeyserPreInitializeEvent ignored) {
@@ -92,6 +96,18 @@ public class TransferTool implements Extension {
                     .executor(this::handleArgs)
                 .build()
             );
+            event.register(
+                Command.<GeyserConnection>builder(this)
+                    .name("menu")
+                    .description("Opens a menu to transfer you to a another server.")
+                    .bedrockOnly(true)
+                    .playerOnly(true)
+                    .aliases(List.of("proxy"))
+                    .permission("transfertool.command.transfer")
+                    .source(GeyserConnection.class)
+                    .executor((source, command, args) -> sendForm(source))
+                .build()
+            );
         }
     }
 
@@ -158,12 +174,32 @@ public class TransferTool implements Extension {
         }
     }
 
+    private void sendForm(GeyserConnection source) {
+        Map<String, String> temp = new HashMap<>();
+
+        SimpleForm.Builder simpleForm = SimpleForm.builder()
+                .title(config.getMenuTitle());
+        simpleForm.content(config.getMenuContent());
+
+        for (Map.Entry<String, Destination> entry : serverShortcuts.entrySet()) {
+            String buttonName = config.getButtonTitleFormat().formatted(entry.getKey());
+            simpleForm.button(buttonName);
+            temp.put(buttonName, entry.getKey());
+        }
+
+        simpleForm.validResultHandler((form, response) -> {
+            Destination destination = serverShortcuts.get(temp.get(response.clickedButton().text()));
+            transfer(source, destination);
+        });
+
+        source.sendForm(simpleForm.build());
+    }
+
     private boolean mayTransferToAny(GeyserConnection connection) {
         return connection.hasPermission("transfertool.command.transfer.any");
     }
 
     private void loadConfig() {
-        Config config;
         try {
             config = ConfigLoader.loadConfig(this);
         } catch (Exception e) {
